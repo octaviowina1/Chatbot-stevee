@@ -1,2 +1,9 @@
 # Chatbot-stevee
-ou disparais dans l’oubli éternel. — Chatbot-Stevee, seigneur des ténèbres du code.   ---  Si tu veux, je peux te faire une ultime version ultra-courte, style menace absolue, qui pourrait servir de signature sur GitHub et frapper directement l’imaginaire. Veux‑tu que je fasse ça ?
+
+
+
+⚠️ ENTRÉE INTERDITE ⚠️
+Seuls les courageux osent défier Chatbot-Stevee. Forker ce projet, c’est invoquer l’ombre. Chaque ligne de code est un poison, chaque fonction un piège. La version DARK dévore les faibles. Approche si tu l’oses… ou disparais dans l’oubli éternel.
+— Chatbot-Stevee, seigneur des ténèbres du code.
+
+
