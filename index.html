@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEVANO-GPT</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: linear-gradient(135deg, #e9eef6 0%, #c2e9fb 100%);}
+    header { text-align: center; background: #fff; padding: 22px 0 14px 0; border-bottom: 2px solid #c2e9fb; box-shadow: 0 2px 8px rgba(120,180,200,0.12);}
+    .rainbow-text {
+      background: linear-gradient(90deg, #0093E9 0%, #80D0C7 100%);
+      background-size: 1200% 1200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 5s linear infinite;
+      display: inline-block;
+      font-size: 3.2rem;
+      font-weight: bold;
+      letter-spacing: 3.5px;
+      line-height: 1.1;
+    }
+    @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}}
+    #welcome-bar {
+      width: 100%;
+      background: linear-gradient(90deg, #fff 10%, #c2e9fb 100%);
+      color: #242d33;
+      font-weight: bold;
+      font-size: 1.15em;
+      padding: 14px 18px;
+      border-bottom: 2px solid #80d0c7;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: pre-line;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(120,180,200,0.11), 0 1px 8px rgba(0,0,0,0.04);
+      user-select: none;
+      border-radius: 0 0 18px 18px;
+      text-shadow: 0 2px 6px #eaf3fa;
+    }
+    .bienvenue-anim {
+      font-weight: bold;
+      font-size: 1.1em;
+      display: inline-block;
+      background: linear-gradient(-45deg, #0093E9, #80D0C7, #43e97b, #38f9d7, #fffb00, #ff00cc, #3333ff, #00ffcc, #ff3333);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow-text 6s ease-in-out infinite, floatX 5s ease-in-out infinite;
+    }
+    @keyframes rainbow-text {
+      0% {background-position:0% 50%}
+      50% {background-position:100% 50%}
+      100% {background-position:0% 50%}
+    }
+    @keyframes floatX {
+      0%,100% { transform: translateX(0);}
+      50% { transform: translateX(18px);}
+    }
+    #chat { flex: 1 1 auto; overflow-y: auto; padding: 14px 8px 8px 8px; background: rgba(34, 44, 54, 0.08); display: flex; flex-direction: column; min-height: 0; border-radius: 0 0 16px 16px;}
+    .message { margin: 7px 0; padding: 11px 15px; border-radius: 13px; max-width: 82%; word-break: break-word; white-space: pre-wrap; font-size: 1em; color: #23272f; border: 1px solid #e0eaff; background: #fafdff; box-shadow: 0 2px 7px rgba(0,0,0,0.04);}
+    .user { background: linear-gradient(90deg, #e0ecf9 10%, #c2e9fb 90%); align-self: flex-end; color: #23272f; border-bottom-right-radius: 4px;}
+    .bot { background: linear-gradient(90deg, #e0ffe0 10%, #cafffa 90%); align-self: flex-start; color: #23272f; border-bottom-left-radius: 4px;}
+    .loader { display: inline-block; min-width: 2em; color: #2b5d6e; font-weight: bold; font-size: 1.08em;}
+    .message img, .message video { max-width: 210px; max-height: 180px; border-radius: 8px; margin-top: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.09); display: block; object-fit: cover; background: #16191f;}
+    #inputArea { display: flex; align-items: center; gap: 4px; padding: 10px 6px; background: #fafdff; border-top: 2px solid #c2e9fb;}
+    #userInput { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 9px; border: 1.5px solid #c2e9fb; outline: none; background: #fff; color: #23272f; font-size: 1em; margin-right: 4px;}
+    #userInput::placeholder { color: #7da0b0; opacity: 0.8;}
+    #fileInput { display: none;}
+    .file-label { display: inline-block; background: linear-gradient(90deg, #43e97b 10%, #38f9d7 90%); color: #23272f; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1em; transition: background 0.18s, color 0.18s; margin-right: 2px;}
+    .file-label:hover, .file-label:focus { background: linear-gradient(90deg, #80d0c7 10%, #0093e9 90%); color: #fff;}
+    button { padding: 10px 18px; border: none; border-radius: 9px; background: linear-gradient(90deg, #80d0c7 10%, #0093e9 90%); color: #fff; font-weight: bold; font-size: 1em; cursor: pointer; transition: background 0.19s, transform 0.08s;}
+    button:hover, button:focus { background: linear-gradient(90deg, #43e97b 10%, #38f9d7 90%); color: #23272f; transform: translateY(-1px) scale(1.025);}
+    @media (max-width: 600px) {
+      header { font-size: 1.15rem; padding: 8px 0; }
+      .rainbow-text { font-size: 2rem; }
+      #welcome-bar { font-size: .97em; }
+      #chat { padding: 5px 1px 3px 1px; border-radius: 0 0 10px 10px; }
+      .message { font-size: .98em; max-width: 97%; padding: 7px 7px; }
+      #inputArea { padding: 5px 1px; }
+      button, .file-label { font-size: .95em; padding: 7px 7px; }
+      .message img, .message video { max-width: 98vw; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="rainbow-text">STEVANO-GPT</span>
+  </header>
+  <div id="welcome-bar">
+    <span class="bienvenue-anim">
+      👋 Bienvenue chez Stevano-GPT ! 🤖✨ Je suis une intelligence artificielle créée par Steve Tchona. 🧑‍💻💡 Je peux vous répondre à toutes vos questions, même sur la météo ! ☀️🌧️❓
+    </span>
+  </div>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <label class="file-label" tabindex="0">
+      📎
+      <input type="file" id="fileInput" accept="image/*,video/*">
+    </label>
+    <input id="userInput" placeholder="Écrivez un message..." autocomplete="off" />
+    <button id="sendBtn">Envoyer</button>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const API_KEY = "AIzaSyCPxZ5M3GQ5Z9VcgOkRTcbwgpi7VtONOIc";
+    const MODEL_VISION = "gemini-pro-vision";
+    const MODEL_TEXT = "gemini-2.0-flash";
+    const chatBox = document.getElementById('chat');
+    const inputField = document.getElementById('userInput');
+    const fileInput = document.getElementById('fileInput');
+    const sendBtn = document.getElementById('sendBtn');
+    let conversation = [];
+
+    const SYSTEM_PROMPT = {
+      role: "user",
+      parts: [{
+        text: `Tu es STEVANO-GPT, un assistant doté d'une culture générale exceptionnelle. Tu donnes toujours des réponses précises et détaillées, sur tous les sujets actuels ou historiques (y compris par exemple le premier au bac du Bénin, les records, la météo, la culture, etc). Si tu ne sais pas, tu expliques que tu n’as pas l’information en temps réel mais que tu peux donner des éléments de contexte.`
+      }]
+    };
+    conversation.push(SYSTEM_PROMPT);
+
+    const smileEmojis = ["😊","😄","😁","😃","😸","😺","🤗","😆","😋","😎","😉","🥰","😇","🥳","😻"];
+    let lastEmoji = "";
+    function randomSmileEmoji() {
+      let choice;
+      do {
+        choice = smileEmojis[Math.floor(Math.random() * smileEmojis.length)];
+      } while (choice === lastEmoji && smileEmojis.length > 1);
+      lastEmoji = choice;
+      return choice;
+    }
+
+    function afficherMessage(texte, type) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', type);
+      msg.innerHTML = marked.parseInline(texte);
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return msg;
+    }
+
+    function afficherMedia(file, type) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', type);
+      let mediaElem;
+      if (file.type.startsWith("image/")) {
+        mediaElem = document.createElement('img');
+        mediaElem.src = file.url;
+        mediaElem.alt = file.name;
+      } else if (file.type.startsWith("video/")) {
+        mediaElem = document.createElement('video');
+        mediaElem.src = file.url;
+        mediaElem.controls = true;
+      }
+      msg.appendChild(mediaElem);
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function afficherLoader() {
+      const msg = document.createElement('div');
+      msg.classList.add('message', 'bot', 'loader');
+      msg.innerHTML = `<span id="loader-text">STEVANO-GPT réfléchit</span><span class="loader-dots">...</span>`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      let dots = msg.querySelector('.loader-dots');
+      let dotCount = 0;
+      const interval = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        dots.textContent = '.'.repeat(dotCount);
+      }, 300);
+      msg._loaderInterval = interval;
+      return msg;
+    }
+
+    function remplacerLoaderParReponse(loaderMsg, texte) {
+      clearInterval(loaderMsg._loaderInterval);
+      let texteFinal = texte + " " + randomSmileEmoji();
+      loaderMsg.classList.remove('loader');
+      loaderMsg.innerHTML = marked.parseInline(texteFinal);
+    }
+
+    async function sendMessage() {
+      const userMsg = inputField.value.trim();
+      const file = fileInput.files[0];
+
+      if (!userMsg && !file) return;
+
+      if (userMsg) conversation.push({ role: "user", parts: [{ text: userMsg }] });
+      if (userMsg) afficherMessage(userMsg, "user");
+      inputField.value = "";
+
+      let loaderMsg = afficherLoader();
+
+      let fini = false;
+
+      // Détection question créateur
+      if (userMsg && detectQuestionCreateur(userMsg)) {
+        setTimeout(() => {
+          if (!fini) {
+            remplacerLoaderParReponse(loaderMsg, "J’ai été créé par TCHONA Steve Exocé, qui a suivi une formation en programmation au centre TeamUp à Sokponta. Actuellement, il effectue un stage au centre TeamUp.");
+            conversation.push({ role: "model", parts: [{ text: "J’ai été créé par TCHONA Steve Exocé, qui a suivi une formation en programmation au centre TeamUp à Sokponta. Actuellement, il effectue un stage au centre TeamUp." }] });
+            fini = true;
+          }
+        }, 500);
+        return;
+      }
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          afficherMedia({url: e.target.result, name: file.name, type: file.type}, "user");
+
+          if (file.type.startsWith("image/")) {
+            const prompt = userMsg ? userMsg : "Décris-moi cette image.";
+            conversation.push({
+              role: "user",
+              parts: [
+                { text: prompt },
+                {
+                  inline_data: {
+                    mime_type: file.type,
+                    data: e.target.result.split(',')[1]
+                  }
+                }
+              ]
+            });
+
+            try {
+              const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_VISION}:generateContent?key=${API_KEY}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ contents: conversation.slice(-5) })
+                }
+              );
+              const data = await res.json();
+              const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "(Pas de réponse)";
+              if (!fini) {
+                remplacerLoaderParReponse(loaderMsg, reply);
+                conversation.push({ role: "model", parts: [{ text: reply }] });
+                fini = true;
+              }
+            } catch (err) {
+              if (!fini) {
+                remplacerLoaderParReponse(loaderMsg, "Erreur de connexion à l'API pour l'image.");
+                fini = true;
+              }
+            }
+            inputField.value = "";
+            return;
+          }
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = "";
+        if (file.type.startsWith("image/")) return;
+      }
+
+      if (userMsg && (!file || (file && !file.type.startsWith("image/")))) {
+        if (isFinMessage(userMsg)) {
+          setTimeout(() => {
+            if (!fini) {
+              remplacerLoaderParReponse(loaderMsg, "Je vous remercie, vous n’avez plus d’autres préoccupations ?");
+              conversation.push({ role: "model", parts: [{ text: "Je vous remercie, vous n’avez plus d’autres préoccupations ?" }] });
+              fini = true;
+            }
+          }, 400);
+          return;
+        }
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_TEXT}:generateContent?key=${API_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ contents: conversation.slice(-5) })
+            }
+          );
+          const data = await res.json();
+          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "(Pas de réponse)";
+          if (!fini) {
+            remplacerLoaderParReponse(loaderMsg, reply);
+            conversation.push({ role: "model", parts: [{ text: reply }] });
+            fini = true;
+          }
+        } catch (err) {
+          if (!fini) {
+            remplacerLoaderParReponse(loaderMsg, "Erreur de connexion à l'API");
+            fini = true;
+          }
+        }
+      }
+    }
+
+    function isFinMessage(txt) {
+      const motsFin = [
+        "ok", "merci", "thank", "thanks", "c'est bon", "ça va", "cool", "parfait", "d'accord", "super",
+        "bien reçu", "merci beaucoup", "thanks a lot", "c bon", "fin", "au revoir", "bye", "goodbye"
+      ];
+      const cleaned = txt.trim().toLowerCase().replace(/[.!?,;:]/g, "");
+      return motsFin.some(fin => cleaned === fin);
+    }
+
+    function detectQuestionCreateur(texte) {
+      const patterns = [
+        "qui t'a créé", "qui t’a créé", "qui t'a programme", "qui t’a programme",
+        "qui est ton créateur", "qui est ton createur", "qui est ton auteur",
+        "qui t'a développé", "qui t’a développé", "qui t'a codé", "qui t’a codé",
+        "qui t'a conçu", "qui t’a conçu", "qui t'a fait", "qui t’a fait",
+        "qui est derrière toi", "ton créateur", "ton createur", "ta créatrice", "ta createur",
+        "qui t’a conçu", "qui t’a créé", "qui ta créé", "qui ta conçu"
+      ];
+      const lower = texte.toLowerCase();
+      return patterns.some(p => lower.includes(p));
+    }
+
+    sendBtn.onclick = sendMessage;
+    inputField.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+    document.querySelector(".file-label").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" || e.key === " ") fileInput.click();
+    });
+  </script>
+</body>
+</html>
